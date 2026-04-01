@@ -14,7 +14,7 @@ import AdminEventos from './components/admin/AdminEventos';
 import AdminCursos from './components/admin/AdminCursos';
 import AdminSocios from './components/admin/AdminSocios';
 import AdminReservas from './components/admin/AdminReservas';
-import AdminLogin from './pages/admin/AdminLogin';
+import AdminLogin from './pages/AdminLogin'; // Antes decía ./pages/admin/AdminLogin
 
 function App() {
   const { role, logoutAdmin } = useAuth();

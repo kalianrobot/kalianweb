@@ -1,179 +1,40 @@
-
-import React, { useState, useEffect } from 'react';
-
-import { db, auth } from '../../firebase';
-
-import { collection, getDocs } from 'firebase/firestore';
-
+import React from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
 
-import ReservaForm from './ReservaForm';
-
-
-
 const HomePublica = () => {
-
-  const [eventos, setEventos] = useState([]);
-
-  const [cursos, setCursos] = useState([]);
-
-  const [loading, setLoading] = useState(true);
-
-  const [seleccionado, setSeleccionado] = useState(null);
-
-  const [usuario, setUsuario] = useState(null);
-
-
-
-  useEffect(() => {
-
-    const unsub = auth.onAuthStateChanged(u => setUsuario(u));
-
-    const fetchData = async () => {
-
-      try {
-
-        const snapE = await getDocs(collection(db, "eventos"));
-
-        setEventos(snapE.docs.map(d => ({ id: d.id, ...d.data() })));
-
-        const snapC = await getDocs(collection(db, "cursos"));
-
-        setCursos(snapC.docs.map(d => ({ id: d.id, ...d.data() })));
-
-      } catch (err) { console.error(err); }
-
-      setLoading(false);
-
-    };
-
-    fetchData();
-
-    return () => unsub();
-
-  }, []);
-
-
-
-  if (loading) return <div className="h-screen flex items-center justify-center font-black text-slate-300 italic uppercase tracking-widest">KalianHKG...</div>;
-
-
+  const { role, currentUser } = useAuth();
 
   return (
-
-    <div className="min-h-screen bg-slate-50 font-sans pb-20">
-
-      <header className="bg-white py-12 px-6 text-center border-b mb-16 shadow-sm">
-
-        <h1 className="text-6xl font-black italic mb-8 tracking-tighter text-slate-900">KALIANHKG</h1>
-
-        <div className="flex justify-center gap-4">
-
-          {usuario ? (
-
-            <Link to="/perfil" className="bg-indigo-600 text-white px-10 py-3 rounded-[1.5rem] font-bold shadow-lg hover:bg-indigo-700 transition-all">MI PERFIL</Link>
-
-          ) : (
-
-            <Link to="/login" className="bg-slate-900 text-white px-10 py-3 rounded-[1.5rem] font-bold shadow-lg hover:bg-indigo-600 transition-all">ACCESO SOCIOS</Link>
-
-          )}
-
-          <Link to="/admin" className="text-slate-400 px-10 py-3 font-bold hover:text-slate-900 transition-all">STAFF</Link>
-
+    <div className="p-8 text-center">
+      <h1 className="text-4xl font-bold mb-4">Bienvenidos a Kalian HKG</h1>
+      
+      {role === 'invitado' && (
+        <div>
+          <p className="mb-6">Únete a nuestra asociación de música y disfruta de eventos exclusivos.</p>
+          <Link to="/login" className="bg-blue-600 text-white px-6 py-2 rounded">Área Socios</Link>
         </div>
-
-      </header>
-
-
-
-      <main className="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-16">
-
-        {/* EVENTOS */}
-
-        <section>
-
-          <h2 className="text-2xl font-black mb-10 italic uppercase border-l-8 border-indigo-600 pl-6 text-slate-800">Conciertos</h2>
-
-          <div className="space-y-8">
-
-            {eventos.map(ev => (
-
-              <div key={ev.id} className="bg-white p-10 rounded-[3rem] shadow-xl border border-slate-100 hover:scale-[1.02] transition-transform">
-
-                <h3 className="text-3xl font-bold text-slate-900 leading-none mb-2">{ev.titulo}</h3>
-
-                <p className="text-indigo-600 font-black text-xs uppercase tracking-[0.2em] mb-6">{ev.fecha}</p>
-
-                <div className="flex justify-between items-center pt-8 border-t border-slate-50">
-
-                  <span className="text-4xl font-black text-slate-900 tracking-tighter">{ev.precio_estandar}€</span>
-
-                  <button onClick={() => setSeleccionado(ev)} className="bg-indigo-600 text-white px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl">Reservar</button>
-
-                </div>
-
-              </div>
-
-            ))}
-
-          </div>
-
-        </section>
-
-
-
-        {/* CURSOS */}
-
-        <section>
-
-          <h2 className="text-2xl font-black mb-10 italic uppercase border-l-8 border-emerald-500 pl-6 text-slate-800">Academia</h2>
-
-          <div className="space-y-8">
-
-            {cursos.map(cu => (
-
-              <div key={cu.id} className="bg-white p-10 rounded-[3rem] shadow-xl border border-slate-100 hover:scale-[1.02] transition-transform">
-
-                <h3 className="text-3xl font-bold text-slate-900 leading-none mb-2">{cu.titulo}</h3>
-
-                <p className="text-emerald-600 font-black text-xs uppercase tracking-[0.2em] mb-6">{cu.periodicidad}</p>
-
-                <div className="flex justify-between items-center pt-8 border-t border-slate-50">
-
-                  <span className="text-4xl font-black text-slate-900 tracking-tighter">{cu.precio}€</span>
-
-                  <button onClick={() => setSeleccionado(cu)} className="bg-emerald-500 text-white px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl">Inscribirse</button>
-
-                </div>
-
-              </div>
-
-            ))}
-
-          </div>
-
-        </section>
-
-      </main>
-
-
-
-      {seleccionado && (
-
-        <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center z-[200] p-4">
-
-          <ReservaForm item={seleccionado} alCerrar={() => setSeleccionado(null)} />
-
-        </div>
-
       )}
 
+      {role === 'socio' && (
+        <div className="bg-green-100 p-6 rounded-lg shadow-md">
+          <h2 className="text-2xl font-semibold">Hola de nuevo, Socio</h2>
+          <p className="mt-2">Tu suscripción de música expira el: 2026-05-06</p>
+          <Link to="/perfil" className="mt-4 inline-block text-blue-600 underline">Ver mi carnet digital</Link>
+        </div>
+      )}
+
+      {role === 'admin' && (
+        <div className="bg-purple-100 p-6 rounded-lg border-2 border-purple-500">
+          <h2 className="text-2xl font-bold text-purple-800">Modo Administrador</h2>
+          <p className="mb-4">Tienes control total sobre eventos y socios.</p>
+          <Link to="/admin" className="bg-purple-600 text-white px-8 py-3 rounded-full font-bold hover:bg-purple-700 transition">
+            IR AL PANEL DE CONTROL
+          </Link>
+        </div>
+      )}
     </div>
-
   );
-
 };
 
 export default HomePublica;
-
